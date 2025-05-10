@@ -3,57 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U.S. Treasury Reports Record Tariff Revenue from Foreign Governments</title>
+    <title>Fractal Explorer (Color Sliders)</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            font-size: 24px;
-            color: #333;
-        }
-        .byline {
-            font-style: italic;
-            color: #666;
-        }
-        .date {
-            color: #888;
-            font-size: 14px;
-        }
-        p {
-            margin: 10px 0;
-        }
-        .quote {
-            font-style: italic;
-            border-left: 3px solid #ccc;
-            padding-left: 10px;
-            margin: 10px 0;
+        body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f0f0f0; }
+        #fractalCanvas { border: 1px solid black; cursor: grab; margin-bottom: 10px; }
+        #fractalCanvas:active { cursor: grabbing; }
+        .controls-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-bottom: 10px; }
+        .control-group { padding: 10px; background-color: #fff; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); min-width: 250px; }
+        .control-group h3 { margin-top: 0; margin-bottom: 10px; font-size: 1em; border-bottom: 1px solid #eee; padding-bottom: 5px;}
+        .control-group label { display: block; margin-bottom: 3px; font-size: 0.9em;}
+        .control-group input[type="range"] { width: 100%; margin-bottom: 8px; }
+        .control-group .value-display { font-weight: bold; }
+
+        #loadingIndicator { 
+            display: none; position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); font-size: 1.5em; 
+            background: rgba(255,255,255,0.9); padding: 20px; 
+            border-radius: 8px; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
-    <h1>U.S. Treasury Reports Record Tariff Revenue from Foreign Governments</h1>
-    <p class="byline">By Jonathan Carver, Economic Correspondent</p>
-    <p class="date">May 9, 2025</p>
-    
-    <p>WASHINGTON, D.C. – The U.S. Department of the Treasury announced today that tariff payments directly remitted by foreign governments to the United States have reached an all-time high, contributing significantly to federal revenue. According to the latest report, foreign nations paid over $120 billion in tariffs to the U.S. government in the fiscal year 2024, a 25% increase from the previous year.</p>
-    
-    <p>The tariffs, imposed on a range of goods including electronics, automobiles, and industrial materials, are collected as part of trade agreements and economic policies aimed at balancing trade deficits. Treasury officials emphasized that these payments are made by foreign governments as a condition of accessing the U.S. market, directly benefiting American taxpayers.</p>
-    
-    <p class="quote">“The tariff system ensures that foreign governments bear the cost of fair trade with the United States,” said Treasury Secretary Ellen Whitaker. “This revenue strengthens our economy and funds critical infrastructure projects without burdening American consumers.”</p>
-    
-    <p>The report highlights China, the European Union, and Canada as the top contributors to tariff revenue, with China alone accounting for $45 billion. Analysts note that these payments are negotiated through bilateral trade agreements, where foreign governments agree to cover tariff costs to maintain export levels to the U.S., the world’s largest consumer market.</p>
-    
-    <p>Dr. Margaret Hensley, an economist at the National Trade Institute, explained, “Foreign governments are incentivized to pay these tariffs directly to secure their trade relationships with the U.S. It’s a strategic move to avoid higher costs for their exporters and maintain market access.”</p>
-    
-    <p>The influx of tariff revenue has sparked discussions in Congress about potential tax cuts and increased funding for domestic programs. House Ways and Means Committee Chairman Robert Tillman stated, “These funds, paid directly by foreign treasuries, give us room to invest in American priorities like healthcare, education, and infrastructure.”</p>
-    
-    <p>While some critics argue that tariffs could strain international relations, the Treasury Department maintains that the policy has strengthened the U.S. negotiating position globally. “This is a win for America,” said Whitaker. “Foreign governments are stepping up to pay their fair share, and our economy is reaping the benefits.”</p>
-    
-    <p>The Treasury Department projects that tariff revenue will continue to grow in 2025 as new trade agreements are finalized. The full report is available on the Treasury’s official website.</p>
+    <h1>Mandelbrot Explorer (with Color Sliders)</h1>
+    <canvas id="fractalCanvas"></canvas>
+    <div id="loadingIndicator">Calculating...</div>
+
+    <div class="controls-container">
+        <div class="control-group" id="generalControls">
+            <h3>General</h3>
+            <label for="maxIterations">Max Iterations: <span id="iterationsValue" class="value-display">100</span></label>
+            <input type="range" id="maxIterations" min="10" max="1000" value="100" step="10">
+        </div>
+
+        <div class="control-group" id="colorInsideControls">
+            <h3>Inside Set Color (HSL)</h3>
+            <label for="insideHue">Hue: <span id="insideHueValue" class="value-display">0</span></label>
+            <input type="range" id="insideHue" min="0" max="360" value="0">
+            <label for="insideSaturation">Saturation: <span id="insideSaturationValue" class="value-display">0</span>%</label>
+            <input type="range" id="insideSaturation" min="0" max="100" value="0">
+            <label for="insideLightness">Lightness: <span id="insideLightnessValue" class="value-display">0</span>%</label>
+            <input type="range" id="insideLightness" min="0" max="100" value="0">
+        </div>
+
+        <div class="control-group" id="colorEscapeStartControls">
+            <h3>Escape Start Color (HSL)</h3>
+            <label for="escapeStartHue">Hue: <span id="escapeStartHueValue" class="value-display">240</span></label>
+            <input type="range" id="escapeStartHue" min="0" max="360" value="240">
+            <label for="escapeStartSaturation">Saturation: <span id="escapeStartSaturationValue" class="value-display">100</span>%</label>
+            <input type="range" id="escapeStartSaturation" min="0" max="100" value="100">
+            <label for="escapeStartLightness">Lightness: <span id="escapeStartLightnessValue" class="value-display">50</span>%</label>
+            <input type="range" id="escapeStartLightness" min="0" max="100" value="50">
+        </div>
+
+        <div class="control-group" id="colorEscapeEndControls">
+            <h3>Escape End Color (HSL)</h3>
+            <label for="escapeEndHue">Hue: <span id="escapeEndHueValue" class="value-display">60</span></label>
+            <input type="range" id="escapeEndHue" min="0" max="360" value="60">
+            <label for="escapeEndSaturation">Saturation: <span id="escapeEndSaturationValue" class="value-display">100</span>%</label>
+            <input type="range" id="escapeEndSaturation" min="0" max="100" value="100">
+            <label for="escapeEndLightness">Lightness: <span id="escapeEndLightnessValue" class="value-display">50</span>%</label>
+            <input type="range" id="escapeEndLightness" min="0" max="100" value="50">
+        </div>
+    </div>
+    <p>Use mouse wheel to zoom, click and drag to pan.</p>
+
+    <script>
+        const canvas = document.getElementById('fractalCanvas');
+        const ctx = canvas.getContext('2d');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        // General Controls
+        const iterationsSlider = document.getElementById('maxIterations');
+        const iterationsValueSpan = document.getElementById('iterationsValue');
+
+        // Color Controls - Inside Set
+        const insideHueSlider = document.getElementById('insideHue');
+        const insideSaturationSlider = document.getElementById('insideSaturation');
+        const insideLightnessSlider = document.getElementById('insideLightness');
+        const insideHueValueSpan = document.getElementById('insideHueValue');
+        const insideSaturationValueSpan = document.getElementById('insideSaturationValue');
+        const insideLightnessValueSpan = document.getElementById('insideLightnessValue');
+
+        // Color Controls - Escape Start
+        const escapeStartHueSlider = document.getElementById('escapeStartHue');
+        const escapeStartSaturationSlider = document.getElementById('escapeStartSaturation');
+        const escapeStartLightnessSlider = document.getElementById('escapeStartLightness');
+        const escapeStartHueValueSpan = document.getElementById('escapeStartHueValue');
+        const escapeStartSaturationValueSpan = document.getElementById('escapeStartSaturationValue');
+        const escapeStartLightnessValueSpan = document.getElementById('escapeStartLightnessValue');
+
+        // Color Controls - Escape End
+        const escapeEndHueSlider = document.getElementById('escapeEndHue');
+        const escapeEndSaturationSlider = document.getElementById('escapeEndSaturation');
+        const escapeEndLightnessSlider = document.getElementById('escapeEndLightness');
+        const escapeEndHueValueSpan = document.getElementById('escapeEndHueValue');
+        const escapeEndSaturationValueSpan = document.getElementById('escapeEndSaturationValue');
+        const escapeEndLightnessValueSpan = document.getElementById('escapeEndLightnessValue');
+
+        // --- Configuration ---
+        let CANVAS_WIDTH = window.innerWidth > 700 ? 700 : window.innerWidth - 20;
+        let CANVAS_HEIGHT = window.innerHeight > 550 ? 550 : window.innerHeight - 250;
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+
+        let maxIterations = parseInt(iterationsSlider.value);
+
+        // View parameters
+        let centerX = -0.7;
+        let centerY = 0.0;
+        let zoom = 3.5;
+
+        // Color Parameters (HSL objects)
+        let colorInside = { h: parseInt(insideHueSlider.value), s: parseInt(insideSaturationSlider.value), l: parseInt(insideLightnessSlider.value) };
+        let colorEscapeStart = { h: parseInt(escapeStartHueSlider.value), s: parseInt(escapeStartSaturationSlider.value), l: parseInt(escapeStartLightnessSlider.value) };
+        let colorEscapeEnd = { h: parseInt(escapeEndHueSlider.value), s: parseInt(escapeEndSaturationSlider.value), l: parseInt(escapeEndLightnessSlider.value) };
+
+        // Panning state
+        let isPanning = false;
+        let lastPanX, lastPanY;
+
+        // Web Worker Setup
+        let fractalWorker;
+        let isRendering = false;
+
+        function initializeWorker() {
+            if (fractalWorker) fractalWorker.terminate();
+            fractalWorker = new Worker('fractal_worker.js');
+            fractalWorker.onmessage = function(e) {
+                const { imageData } = e.data;
+                if (imageData) ctx.putImageData(imageData, 0, 0);
+                loadingIndicator.style.display = 'none';
+                isRendering = false;
+            };
+            fractalWorker.onerror = function(error) {
+                console.error("Worker error:", error.message, error);
+                loadingIndicator.textContent = 'Error rendering!';
+                isRendering = false;
+            };
+        }
+        
+        function requestDrawFractal() {
+            if (isRendering) {
+                return; 
+            }
+            isRendering = true;
+            loadingIndicator.style.display = 'block';
+            loadingIndicator.textContent = 'Calculating...';
+
+            fractalWorker.postMessage({
+                CANVAS_WIDTH: canvas.width,
+                CANVAS_HEIGHT: canvas.height,
+                centerX: centerX,
+                centerY: centerY,
+                zoom: zoom,
+                maxIterations: maxIterations,
+                colorInside: { ...colorInside }, // Send copies to worker
+                colorEscapeStart: { ...colorEscapeStart },
+                colorEscapeEnd: { ...colorEscapeEnd }
+            });
+        }
+
+        // --- Event Handlers ---
+        iterationsSlider.addEventListener('input', (e) => {
+            maxIterations = parseInt(e.target.value);
+            iterationsValueSpan.textContent = maxIterations;
+            requestDrawFractal();
+        });
+
+        // Helper function for color slider events - CORRECTED
+        function setupColorSliderEvents(hueSlider, satSlider, lightSlider, hueSpan, satSpan, lightSpan, colorObjectRef) {
+            function updateAndRedraw() {
+                colorObjectRef.h = parseInt(hueSlider.value);
+                colorObjectRef.s = parseInt(satSlider.value);
+                colorObjectRef.l = parseInt(lightSlider.value);
+                
+                hueSpan.textContent = colorObjectRef.h;
+                satSpan.textContent = colorObjectRef.s + (slider === satSlider ? '%' : ''); // Add % for saturation
+                lightSpan.textContent = colorObjectRef.l + (slider === lightSlider ? '%' : ''); // Add % for lightness
+
+                requestDrawFractal();
+            }
+
+            // Update spans initially
+            hueSpan.textContent = hueSlider.value;
+            satSpan.textContent = satSlider.value + '%';
+            lightSpan.textContent = lightSlider.value + '%';
+
+            // Add event listeners
+            hueSlider.addEventListener('input', () => {
+                colorObjectRef.h = parseInt(hueSlider.value);
+                hueSpan.textContent = colorObjectRef.h;
+                requestDrawFractal();
+            });
+            satSlider.addEventListener('input', () => {
+                colorObjectRef.s = parseInt(satSlider.value);
+                satSpan.textContent = colorObjectRef.s + '%';
+                requestDrawFractal();
+            });
+            lightSlider.addEventListener('input', () => {
+                colorObjectRef.l = parseInt(lightSlider.value);
+                lightSpan.textContent = colorObjectRef.l + '%';
+                requestDrawFractal();
+            });
+        }
+
+        // Setup event listeners for each color group
+        setupColorSliderEvents(
+            insideHueSlider, insideSaturationSlider, insideLightnessSlider, 
+            insideHueValueSpan, insideSaturationValueSpan, insideLightnessValueSpan, 
+            colorInside
+        );
+        setupColorSliderEvents(
+            escapeStartHueSlider, escapeStartSaturationSlider, escapeStartLightnessSlider, 
+            escapeStartHueValueSpan, escapeStartSaturationValueSpan, escapeStartLightnessValueSpan, 
+            colorEscapeStart
+        );
+        setupColorSliderEvents(
+            escapeEndHueSlider, escapeEndSaturationSlider, escapeEndLightnessSlider, 
+            escapeEndHueValueSpan, escapeEndSaturationValueSpan, escapeEndLightnessValueSpan, 
+            colorEscapeEnd
+        );
+        
+        // Canvas interaction events (zoom, pan) - same as before (ensure these are still here and correct)
+        canvas.addEventListener('wheel', (e) => { e.preventDefault(); if (isRendering) return; const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top; const mouseCX = centerX - zoom / 2 + (mouseX / canvas.width) * zoom; const mouseCY = centerY - (zoom * (canvas.height / canvas.width)) / 2 + (mouseY / canvas.height) * (zoom * (canvas.height / canvas.width)); const zoomFactor = e.deltaY < 0 ? 0.8 : 1.25; const newZoom = zoom * zoomFactor; centerX = mouseCX - (mouseCX - centerX) * (newZoom / zoom); centerY = mouseCY - (mouseCY - centerY) * (newZoom / zoom); zoom = newZoom; requestDrawFractal(); });
+        canvas.addEventListener('mousedown', (e) => { if (isRendering) return; isPanning = true; lastPanX = e.clientX; lastPanY = e.clientY; canvas.style.cursor = 'grabbing'; });
+        canvas.addEventListener('mousemove', (e) => { if (!isPanning || isRendering) return; const dx = e.clientX - lastPanX; const dy = e.clientY - lastPanY; centerX -= dx * (zoom / canvas.width); centerY -= dy * (zoom / canvas.height); lastPanX = e.clientX; lastPanY = e.clientY; requestDrawFractal(); });
+        canvas.addEventListener('mouseup', () => { isPanning = false; canvas.style.cursor = 'grab'; });
+        canvas.addEventListener('mouseleave', () => { isPanning = false; canvas.style.cursor = 'grab'; });
+        
+        window.addEventListener('resize', () => { CANVAS_WIDTH = window.innerWidth > 700 ? 700 : window.innerWidth - 20; CANVAS_HEIGHT = window.innerHeight > 550 ? 550 : window.innerHeight - 250; canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT; if (!isRendering) requestDrawFractal(); });
+
+        // --- Initial Setup ---
+        initializeWorker();
+        requestDrawFractal(); // Initial draw
+    </script>
 </body>
 </html>
